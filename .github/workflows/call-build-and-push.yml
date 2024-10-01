@@ -1,12 +1,24 @@
-name: Call Build and Push
+name: Build and Push Base Windows C++ Image
 
-on: 
+on:
+  workflow_call:
   push:
     branches:
       - main
 
 jobs:
-  call-workflow:
-    uses: scorchSupernova/base-image/.github/workflows/build-and-push-base.yml@main
-    with:
-      image_name: saidursajol/my-cpp-project-image:latest
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Build Base Docker Image
+        run: docker build -t saidursajol/my-base-windows-cpp-image-project:latest .
+
+      - name: Push Base Docker Image
+        run: docker push saidursajol/my-base-windows-cpp-image-project:latest
