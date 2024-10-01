@@ -1,0 +1,8 @@
+.vs
+Debug64
+packages
+Release64
+/log
+/include
+ThirdParty/
+kafka_config

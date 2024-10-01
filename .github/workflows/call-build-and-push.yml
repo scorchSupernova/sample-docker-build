@@ -1,0 +1,12 @@
+name: Call Build and Push
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  call-workflow:
+    uses: scorchSupernova/base-image/.github/workflows/build-and-push-base.yml@main
+    with:
+      image_name: saidursajol/my-cpp-project-image:latest
