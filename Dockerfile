@@ -2,17 +2,6 @@
 
 FROM saidursajol/my-base-windows-cpp-image:latest
 
-# Copy vcpkg.json and install dependencies using vcpkg manifest mode
-COPY install_package.cpp  ./
-COPY generate_package_json.cpp  ./
-RUN g++ install_package.cpp -o install-package
-RUN .\install-package.exe
-# COPY vcpkg.json C:\vcpkg.json
-RUN .\vcpkg\vcpkg install --triplet x64-windows --feature-flags=manifests
-
-# Update PATH environment variable for Visual Studio and MSBuild tools
-RUN refreshenv
-
 # Create deploy directory and copy project files
 RUN mkdir deploy
 COPY . /deploy/
