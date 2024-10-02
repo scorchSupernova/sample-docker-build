@@ -3,8 +3,9 @@
 FROM saidursajol/my-base-windows-cpp-image:latest
 
 
-# Test if msbuild can be accessed without path
-RUN msbuild -version
+RUN powershell.exe -Command $path = $env:path + ';C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.38.33130\bin\Hostx64\x64;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64'; Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\' -Name Path -Value $path
+RUN refreshenv
+
 
 # Install NuGet and related packages
 RUN choco install nuget.commandline -y
