@@ -1,4 +1,7 @@
+# escape=`
+
 FROM saidursajol/my-base-windows-cpp-image:latest
+
 
 # Test if msbuild can be accessed without path
 RUN msbuild -version
@@ -14,7 +17,6 @@ WORKDIR ../
 WORKDIR /deploy/packages/
 RUN nuget install librdkafka.redist -Version 2.2.0
 WORKDIR ../../
-
 
 # Build the project
 WORKDIR /deploy/
