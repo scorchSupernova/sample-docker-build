@@ -1,6 +1,10 @@
-# escape=`
-
 FROM saidursajol/my-base-windows-cpp-image:latest
+
+# Test if msbuild can be accessed without path
+RUN msbuild -version
+
+# Install NuGet and related packages
+RUN choco install nuget.commandline -y
 
 # Create deploy directory and copy project files
 RUN mkdir deploy
@@ -11,8 +15,6 @@ WORKDIR /deploy/packages/
 RUN nuget install librdkafka.redist -Version 2.2.0
 WORKDIR ../../
 
-# Integrate vcpkg with MSBuild
-RUN .\vcpkg\vcpkg integrate install
 
 # Build the project
 WORKDIR /deploy/
