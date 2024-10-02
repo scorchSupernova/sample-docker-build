@@ -3,6 +3,6 @@ Debug64
 packages
 Release64
 /log
-/include
+# /include
 ThirdParty/
 kafka_config
