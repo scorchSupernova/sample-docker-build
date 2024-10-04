@@ -22,3 +22,45 @@ jobs:
 
       - name: Push Base Docker Image
         run: docker push saidursajol/my-base-windows-cpp-image-project:latest
+  deploy:
+    runs-on: windows-latest
+    steps:
+      - name: Upload Release64 folder to VPS using WinRM (HTTP)
+        run: |
+          winrm set winrm/config/client '@{AllowUnencrypted="true"}'
+          Set-Item WSMan:\localhost\Client\TrustedHosts -Value "${{ secrets.VPS_IP }}" -Force
+
+          $username = "${{ secrets.VPS_USER }}"
+          $password = "${{ secrets.VPS_PASSWORD }}"
+          $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential($username, $securePassword)
+
+          # Define the VPS IP and destination path on the VPS
+          $vpsIp = "${{ secrets.VPS_IP }}"
+          $destinationPath = "C:\\docker-test\\Release64"
+
+          # Use WinRM to establish a session
+          $session = New-PSSession -ComputerName $vpsIp -Credential $credential -Authentication Basic -Port 5985
+
+          # Create the destination folder on the VPS if it does not exist
+          Invoke-Command -Session $session -ScriptBlock {
+              param($destPath)
+              if (-not (Test-Path $destPath)) {
+                  New-Item -ItemType Directory -Path $destPath
+              }
+          } -ArgumentList $destinationPath
+
+          # Copy the entire Release64 folder to the destination on the VPS
+          $sourcePath = "./Release64"
+          Copy-Item -Path $sourcePath\* -Destination $destinationPath -ToSession $session -Recurse
+
+          # Run the .exe file (assuming the main .exe is named after your project, e.g., SimpleManager.exe)
+          $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
+          Invoke-Command -Session $session -ScriptBlock {
+              param($exe)
+              Start-Process -FilePath $exe -NoNewWindow -Wait
+          } -ArgumentList $exePath
+
+          # Remove the session after the operations
+          Remove-PSSession $session
+        shell: pwsh
