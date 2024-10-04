@@ -20,11 +20,9 @@ jobs:
       - name: Build Base Docker Image
         run: docker build -t saidursajol/my-base-windows-cpp-image-project:latest .
 
-      - name: Push Base Docker Image
-        run: docker push saidursajol/my-base-windows-cpp-image-project:latest
-      
-      - name: List deploy directory contents
+      - name: List deploy directory contents after Docker build
         run: |
+          # This assumes you're running the command in the right context
           Get-ChildItem -Path ./deploy -Recurse
         shell: pwsh
 

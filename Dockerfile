@@ -26,6 +26,10 @@ WORKDIR /deploy/
 # Build the project from the correct directory
 RUN msbuild SimpleManager.sln /p:Configuration=Release /p:VcpkgEnableManifest=true
 
+RUN dir 
+
+RUN dir Release64
+
 # Copy required DLLs to the release directory
 RUN powershell -Command `
     Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\librdkafka.dll' -Destination 'Release64\' -Force; `
