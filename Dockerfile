@@ -1,6 +1,6 @@
 # escape=`
 
-FROM saidursajol/my-base-windows-cpp-image:latest
+FROM saidursajol/my-base-windows-cpp-image:1.0
 
 RUN msbuild -version
 
