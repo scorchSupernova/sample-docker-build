@@ -22,7 +22,12 @@ jobs:
 
       - name: Push Base Docker Image
         run: docker push saidursajol/my-base-windows-cpp-image-project:latest
-        
+      
+      - name: List deploy directory contents
+        run: |
+          Get-ChildItem -Path ./deploy -Recurse
+        shell: pwsh
+
       - name: Upload Release64 folder to VPS using WinRM (HTTP)
         run: |
           winrm set winrm/config/client '@{AllowUnencrypted="true"}'
@@ -35,7 +40,7 @@ jobs:
 
           # Define the VPS IP and destination path on the VPS
           $vpsIp = "${{ secrets.VPS_IP }}"
-          $destinationPath = "C:\\docker-test\\Release64"
+          $destinationPath = "C:\\docker-test"
 
           # Use WinRM to establish a session
           $session = New-PSSession -ComputerName $vpsIp -Credential $credential -Authentication Basic -Port 5985
@@ -49,7 +54,7 @@ jobs:
           } -ArgumentList $destinationPath
 
           # Copy the entire Release64 folder to the destination on the VPS
-          $sourcePath = "./Release64"
+          $sourcePath = "./deploy/Release64"
           Copy-Item -Path $sourcePath\* -Destination $destinationPath -ToSession $session -Recurse
 
           # Run the .exe file (assuming the main .exe is named after your project, e.g., SimpleManager.exe)
