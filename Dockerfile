@@ -11,6 +11,8 @@ RUN choco install nuget.commandline -y
 RUN mkdir deploy
 COPY . /deploy/
 WORKDIR /deploy/
+RUN dir
+
 WORKDIR ../
 WORKDIR /deploy/packages/
 RUN nuget install librdkafka.redist -Version 2.2.0
