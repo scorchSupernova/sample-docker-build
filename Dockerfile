@@ -5,6 +5,8 @@ FROM saidursajol/my-base-windows-cpp-image:latest
 
 RUN choco install nuget.commandline -y
 
+
+
 # Create deploy directory and copy project files
 RUN mkdir deploy
 COPY . /deploy/
