@@ -22,15 +22,13 @@ jobs:
 
       - name: Push Base Docker Image
         run: docker push saidursajol/my-base-windows-cpp-image-project:latest
-  deploy:
-    runs-on: windows-latest
-    steps:
+        
       - name: Upload Release64 folder to VPS using WinRM (HTTP)
         run: |
           winrm set winrm/config/client '@{AllowUnencrypted="true"}'
           Set-Item WSMan:\localhost\Client\TrustedHosts -Value "${{ secrets.VPS_IP }}" -Force
 
-          $username = "${{ secrets.VPS_USER }}"
+          $username = "${{ secrets.VPS_USERNAME }}"
           $password = "${{ secrets.VPS_PASSWORD }}"
           $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
           $credential = New-Object System.Management.Automation.PSCredential($username, $securePassword)
