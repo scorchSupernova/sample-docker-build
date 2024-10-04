@@ -2,23 +2,28 @@
 
 FROM saidursajol/my-base-windows-cpp-image:1.0
 
+# Verify MSBuild installation
 RUN msbuild -version
 
+# Install NuGet command line
 RUN choco install nuget.commandline -y
-
 
 # Create deploy directory and copy project files
 RUN mkdir deploy
 COPY . /deploy/
 WORKDIR /deploy/
+
+# List files to verify the solution file is copied
 RUN dir
 
-WORKDIR ../
+# Install the librdkafka.redist package
 WORKDIR /deploy/packages/
 RUN nuget install librdkafka.redist -Version 2.2.0
-WORKDIR ../../
 
-# Build the project
+# Go back to deploy directory for building the project
+WORKDIR /deploy/
+
+# Build the project from the correct directory
 RUN msbuild SimpleManager.sln /p:Configuration=Release /p:VcpkgEnableManifest=true
 
 # Copy required DLLs to the release directory
@@ -30,9 +35,7 @@ RUN powershell -Command `
     Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zstd.dll' -Destination 'Release64\' -Force"
 
 # Copy config.json to the release directory
-WORKDIR ../
-WORKDIR /deploy/Release64/
-RUN copy C:\deploy\config.json C:\deploy\Release64\
+RUN copy config.json Release64\
 
 # Set the default command to cmd.exe
 CMD ["cmd.exe"]
