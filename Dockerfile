@@ -2,9 +2,9 @@
 
 FROM saidursajol/my-base-windows-cpp-image:latest
 
+RUN msbuild -version
 
 RUN choco install nuget.commandline -y
-
 
 
 # Create deploy directory and copy project files
@@ -17,16 +17,15 @@ RUN nuget install librdkafka.redist -Version 2.2.0
 WORKDIR ../../
 
 # Build the project
-WORKDIR /deploy/
 RUN msbuild SimpleManager.sln /p:Configuration=Release /p:VcpkgEnableManifest=true
 
-# Copy DLLs to the release directory
+# Copy required DLLs to the release directory
 RUN powershell -Command `
-    Copy-Item 'C:\deploy\packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\librdkafka.dll' -Destination 'C:\deploy\Release64\' -Force; `
-    Copy-Item 'C:\deploy\packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libcrypto-3-x64.dll' -Destination 'C:\deploy\Release64\' -Force; `
-    Copy-Item 'C:\deploy\packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libssl-3-x64.dll' -Destination 'C:\deploy\Release64\' -Force; `
-    Copy-Item 'C:\deploy\packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zlib1.dll' -Destination 'C:\deploy\Release64\' -Force; `
-    Copy-Item 'C:\deploy\packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zstd.dll' -Destination 'C:\deploy\Release64\' -Force"
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\librdkafka.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libcrypto-3-x64.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libssl-3-x64.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zlib1.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zstd.dll' -Destination 'Release64\' -Force"
 
 # Copy config.json to the release directory
 WORKDIR ../
