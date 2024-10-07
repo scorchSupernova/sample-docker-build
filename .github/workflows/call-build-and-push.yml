@@ -20,11 +20,12 @@ jobs:
       - name: Build Base Docker Image
         run: docker build -t saidursajol/my-base-windows-cpp-image-project:latest .
 
-      - name: List deploy directory contents after Docker build
+      - name: Extract Release64 folder from Docker image
         run: |
-          # This assumes you're running the command in the right context
-          Get-ChildItem -Path ./deploy -Recurse
-        shell: pwsh
+          # Create a temporary directory
+          $tempDir = New-Item -ItemType Directory -Path "$env:TEMP\Release64"
+          # Copy files from the Docker container to the temp directory
+          docker run --rm -v $tempDir.FullName:C:\output saidursajol/my-base-windows-cpp-image-project:latest powershell -Command "Copy-Item C:\deploy\Release64\* C:\output -Recurse"
 
       - name: Upload Release64 folder to VPS using WinRM (HTTP)
         run: |
@@ -52,8 +53,8 @@ jobs:
           } -ArgumentList $destinationPath
 
           # Copy the entire Release64 folder to the destination on the VPS
-          $sourcePath = "./deploy/Release64"
-          Copy-Item -Path $sourcePath\* -Destination $destinationPath -ToSession $session -Recurse
+          $sourcePath = "$env:TEMP\Release64"
+          Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse
 
           # Run the .exe file (assuming the main .exe is named after your project, e.g., SimpleManager.exe)
           $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
