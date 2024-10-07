@@ -23,9 +23,28 @@ jobs:
       - name: Extract Release64 folder from Docker image
         run: |
           # Create a temporary directory
-          $tempDir = New-Item -ItemType Directory -Path "$env:TEMP\Release64"
-          # Copy files from the Docker container to the temp directory
-          docker run --rm -v $tempDir.FullName:C:\output saidursajol/my-base-windows-cpp-image-project:latest powershell -Command "Copy-Item C:\deploy\Release64\* C:\output -Recurse"
+          $tempDir = New-Item -ItemType Directory -Path "$env:TEMP\Release64" -Force
+          
+          # Verify tempDir creation
+          if (-Not (Test-Path $tempDir.FullName)) {
+              Write-Host "Temporary directory was not created."
+              exit 1
+          }
+
+          # Copy files from the Docker container to the temp directory with logging
+          $imageName = "saidursajol/my-base-windows-cpp-image-project:latest"
+          Write-Host "Using Docker image: $imageName"
+          
+          $copyResult = docker run --rm -v $tempDir.FullName:C:\output $imageName powershell -Command "
+            if (Test-Path 'C:\deploy\Release64') {
+                Copy-Item 'C:\deploy\Release64\*' 'C:\output' -Recurse -Force
+                Write-Host 'Files copied successfully'
+            } else {
+                Write-Host 'Release64 folder does not exist'
+                exit 1
+            }
+          "
+          Write-Host $copyResult
 
       - name: Upload Release64 folder to VPS using WinRM (HTTP)
         run: |
