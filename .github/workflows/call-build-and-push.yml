@@ -75,7 +75,18 @@ jobs:
           $sourcePath = "$env:TEMP\Release64"
           Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse
 
-          # Run the .exe file (assuming the main .exe is named after your project, e.g., SimpleManager.exe)
+          # Check if SimpleManager.exe exists
+          Invoke-Command -Session $session -ScriptBlock {
+              param($destPath)
+              if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager.exe")) {
+                  Write-Host "SimpleManager.exe found."
+              } else {
+                  Write-Host "SimpleManager.exe not found."
+                  exit 1
+              }
+          } -ArgumentList $destinationPath
+
+          # Run the .exe file
           $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
           Invoke-Command -Session $session -ScriptBlock {
               param($exe)
