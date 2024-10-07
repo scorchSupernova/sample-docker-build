@@ -31,11 +31,12 @@ jobs:
               exit 1
           }
 
-          # Copy files from the Docker container to the temp directory with logging
+          # Verify the image name
           $imageName = "saidursajol/my-base-windows-cpp-image-project:latest"
           Write-Host "Using Docker image: $imageName"
           
-          $copyResult = docker run --rm -v $tempDir.FullName:C:\output $imageName powershell -Command "
+          # Run the Docker command directly
+          docker run --rm -v "$($tempDir.FullName):C:\output" $imageName powershell -Command "
             if (Test-Path 'C:\deploy\Release64') {
                 Copy-Item 'C:\deploy\Release64\*' 'C:\output' -Recurse -Force
                 Write-Host 'Files copied successfully'
@@ -44,7 +45,6 @@ jobs:
                 exit 1
             }
           "
-          Write-Host $copyResult
 
       - name: Upload Release64 folder to VPS using WinRM (HTTP)
         run: |
