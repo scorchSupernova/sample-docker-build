@@ -73,7 +73,8 @@ jobs:
 
           # Copy the entire Release64 folder to the destination on the VPS
           $sourcePath = "$env:TEMP\Release64"
-          Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse
+          Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
+
 
           # Check if SimpleManager.exe exists
           Invoke-Command -Session $session -ScriptBlock {
