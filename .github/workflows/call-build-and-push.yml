@@ -63,37 +63,41 @@ jobs:
           # Use WinRM to establish a session
           $session = New-PSSession -ComputerName $vpsIp -Credential $credential -Authentication Basic -Port 5985
 
-          # Create the destination folder on the VPS if it does not exist
-          Invoke-Command -Session $session -ScriptBlock {
-              param($destPath)
-              if (-not (Test-Path $destPath)) {
-                  New-Item -ItemType Directory -Path $destPath
-              }
-          } -ArgumentList $destinationPath
+          try {
+              # Create the destination folder on the VPS if it does not exist
+              Invoke-Command -Session $session -ScriptBlock {
+                  param($destPath)
+                  if (-not (Test-Path $destPath)) {
+                      New-Item -ItemType Directory -Path $destPath
+                  }
+              } -ArgumentList $destinationPath
 
-          # Copy the entire Release64 folder to the destination on the VPS
-          $sourcePath = "$env:TEMP\Release64"
-          Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
+              # Copy the entire Release64 folder to the destination on the VPS
+              $sourcePath = "$env:TEMP\Release64"
+              Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
 
+              # Check if SimpleManager.exe exists
+              Invoke-Command -Session $session -ScriptBlock {
+                  param($destPath)
+                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager.exe")) {
+                      Write-Host "SimpleManager.exe found."
+                  } else {
+                      Write-Host "SimpleManager.exe not found."
+                      exit 1
+                  }
+              } -ArgumentList $destinationPath
 
-          # Check if SimpleManager.exe exists
-          Invoke-Command -Session $session -ScriptBlock {
-              param($destPath)
-              if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager.exe")) {
-                  Write-Host "SimpleManager.exe found."
-              } else {
-                  Write-Host "SimpleManager.exe not found."
-                  exit 1
-              }
-          } -ArgumentList $destinationPath
+              # Run the .exe file
+              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
+              Invoke-Command -Session $session -ScriptBlock {
+                  param($exe)
+                  Start-Process -FilePath $exe -NoNewWindow -Wait
+              } -ArgumentList $exePath
 
-          # Run the .exe file
-          $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
-          Invoke-Command -Session $session -ScriptBlock {
-              param($exe)
-              Start-Process -FilePath $exe -NoNewWindow -Wait
-          } -ArgumentList $exePath
-
-          # Remove the session after the operations
-          Remove-PSSession $session
+          } catch {
+              Write-Host "An error occurred: $_"
+          } finally {
+              # Remove the session after the operations
+              Remove-PSSession $session
+          }
         shell: pwsh
