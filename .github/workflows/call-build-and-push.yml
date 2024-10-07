@@ -46,7 +46,7 @@ jobs:
             }
           "
 
-      - name: Upload Release64 folder to VPS using WinRM (HTTP)
+      - name: Upload updated Release64 files to VPS using WinRM (HTTP)
         run: |
           winrm set winrm/config/client '@{AllowUnencrypted="true"}'
           Set-Item WSMan:\localhost\Client\TrustedHosts -Value "${{ secrets.VPS_IP }}" -Force
@@ -72,27 +72,43 @@ jobs:
                   }
               } -ArgumentList $destinationPath
 
-              # Copy the entire Release64 folder to the destination on the VPS
+              # Define the source path
               $sourcePath = "$env:TEMP\Release64"
-              Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
 
-              # Check if SimpleManager64.exe exists
-              Invoke-Command -Session $session -ScriptBlock {
-                  param($destPath)
-                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager64.exe")) {
-                      Write-Host "SimpleManager64.exe found."
-                  } else {
-                      Write-Host "SimpleManager64.exe not found."
-                      exit 1
+              # Get list of files in the source directory
+              $files = Get-ChildItem -Path $sourcePath
+
+              foreach ($file in $files) {
+                  # Check if the file exists on the VPS
+                  $remoteFilePath = Join-Path -Path $destinationPath -ChildPath $file.Name
+                  $needsCopy = $true
+
+                  # Check if the file exists on the remote server
+                  $fileExists = Invoke-Command -Session $session -ScriptBlock {
+                      param($filePath)
+                      Test-Path $filePath
+                  } -ArgumentList $remoteFilePath
+
+                  if ($fileExists) {
+                      # Compare last write time
+                      $remoteFileLastWriteTime = Invoke-Command -Session $session -ScriptBlock {
+                          param($filePath)
+                          (Get-Item $filePath).LastWriteTime
+                      } -ArgumentList $remoteFilePath
+
+                      # Check if local file is newer
+                      if ($file.LastWriteTime -le $remoteFileLastWriteTime) {
+                          $needsCopy = $false
+                          Write-Host "File $($file.Name) is up to date."
+                      }
                   }
-              } -ArgumentList $destinationPath
 
-              # Run the .exe file
-              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager64.exe"
-              Invoke-Command -Session $session -ScriptBlock {
-                  param($exe)
-                  Start-Process -FilePath $exe -NoNewWindow -Wait
-              } -ArgumentList $exePath
+                  # If the file is new or updated, copy it
+                  if ($needsCopy) {
+                      Write-Host "Copying $($file.Name) to VPS..."
+                      Copy-Item -Path $file.FullName -Destination $destinationPath -ToSession $session -Force
+                  }
+              }
 
           } catch {
               Write-Host "An error occurred: $_"
@@ -101,3 +117,4 @@ jobs:
               Remove-PSSession $session
           }
         shell: pwsh
+
