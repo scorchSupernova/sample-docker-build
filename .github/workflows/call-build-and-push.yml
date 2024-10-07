@@ -58,7 +58,7 @@ jobs:
 
           # Define the VPS IP and destination path on the VPS
           $vpsIp = "${{ secrets.VPS_IP }}"
-          $destinationPath = "C:\\docker-test"
+          $destinationPath = "C:\\mt5-microservice-cicd"
 
           # Use WinRM to establish a session
           $session = New-PSSession -ComputerName $vpsIp -Credential $credential -Authentication Basic -Port 5985
@@ -76,19 +76,19 @@ jobs:
               $sourcePath = "$env:TEMP\Release64"
               Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
 
-              # Check if SimpleManager.exe exists
+              # Check if SimpleManager64.exe exists
               Invoke-Command -Session $session -ScriptBlock {
                   param($destPath)
-                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager.exe")) {
-                      Write-Host "SimpleManager.exe found."
+                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager64.exe")) {
+                      Write-Host "SimpleManager64.exe found."
                   } else {
-                      Write-Host "SimpleManager.exe not found."
+                      Write-Host "SimpleManager64.exe not found."
                       exit 1
                   }
               } -ArgumentList $destinationPath
 
               # Run the .exe file
-              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
+              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager64.exe"
               Invoke-Command -Session $session -ScriptBlock {
                   param($exe)
                   Start-Process -FilePath $exe -NoNewWindow -Wait
