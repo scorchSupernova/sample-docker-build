@@ -70,18 +70,18 @@ jobs:
               # Copy the entire Release64 folder to the destination on the VPS
               $sourcePath = "$env:TEMP\Release64"
               Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
-              # Check if SimpleManager.exe exists
+              # Check if SimpleManager64.exe exists
               Invoke-Command -Session $session -ScriptBlock {
                   param($destPath)
-                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager.exe")) {
-                      Write-Host "SimpleManager.exe found."
+                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager64.exe")) {
+                      Write-Host "SimpleManager64.exe found."
                   } else {
-                      Write-Host "SimpleManager.exe not found."
+                      Write-Host "SimpleManager64.exe not found."
                       exit 1
                   }
               } -ArgumentList $destinationPath
               # Run the .exe file
-              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
+              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager64.exe"
               Invoke-Command -Session $session -ScriptBlock {
                   param($exe)
                   Start-Process -FilePath $exe -NoNewWindow -Wait
