@@ -56,7 +56,7 @@ jobs:
           $credential = New-Object System.Management.Automation.PSCredential($username, $securePassword)
           # Define the VPS IP and destination path on the VPS
           $vpsIp = "${{ secrets.VPS_IP }}"
-          $destinationPath = "C:\\test-dockeer"
+          $destinationPath = "C:\\MetaTrader5SDK\\Examples\\Manager\\SimpleManager\\mt5-microservice-cicd"
           # Use WinRM to establish a session
           $session = New-PSSession -ComputerName $vpsIp -Credential $credential -Authentication Basic -Port 5985
           try {
