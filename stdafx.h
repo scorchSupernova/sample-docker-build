@@ -57,7 +57,7 @@
 #include <librdkafka/rdkafkacpp.h>
 
 //--- MT5 Manager API
-#include "Include/MT5APIManager.h"
+#include "..\..\..\Include\MT5APIManager.h"
 //+------------------------------------------------------------------+
 //| Manifest                                                         |
 //+------------------------------------------------------------------+

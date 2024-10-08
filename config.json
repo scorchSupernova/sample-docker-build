@@ -15,9 +15,9 @@
     }
   },
   "mt5": {
-    "server": "mt5localcompetition.growthnext.com",
+    "server": "mt5.growthnext.com",
     "login": 1001,
-    "password": "ctgjd0fr"
+    "password": "janina1"
   },
   "logger": {
     "info": true,
@@ -29,16 +29,16 @@
     "login": 352194
   },
   "callBack": {
-    "url": "https://evaluation.fundednext.com/api/receivetrades"
+    "url": "https://api.fundednext.com/api/receivetrades"
   },
   "kafka": {
     "kafka_properties": {
-      "bootstrap.servers": "staging-uat-kafka-37bebda7-wearenext-640d.d.aivencloud.com:14133",
+      "bootstrap.servers": "trades-wearenext-3410.aivencloud.com:22762",
       "security.protocol": "ssl",
       "ssl.ca.location": "./kafka_config/ca.pem",
       "ssl.certificate.location": "./kafka_config/service.cert",
       "ssl.key.location": "./kafka_config/service.key"
     },
-    "topic": "staging_main_trades"
+    "topic": "c_trades"
   }
 }
