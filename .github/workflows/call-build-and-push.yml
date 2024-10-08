@@ -46,23 +46,19 @@ jobs:
             }
           "
 
-      - name: Upload updated Release64 files to VPS using WinRM (HTTP)
+      - name: Upload Release64 folder to VPS using WinRM (HTTP)
         run: |
           winrm set winrm/config/client '@{AllowUnencrypted="true"}'
           Set-Item WSMan:\localhost\Client\TrustedHosts -Value "${{ secrets.VPS_IP }}" -Force
-
           $username = "${{ secrets.VPS_USERNAME }}"
           $password = "${{ secrets.VPS_PASSWORD }}"
           $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
           $credential = New-Object System.Management.Automation.PSCredential($username, $securePassword)
-
           # Define the VPS IP and destination path on the VPS
           $vpsIp = "${{ secrets.VPS_IP }}"
           $destinationPath = "C:\\mt5-microservice-cicd"
-
           # Use WinRM to establish a session
           $session = New-PSSession -ComputerName $vpsIp -Credential $credential -Authentication Basic -Port 5985
-
           try {
               # Create the destination folder on the VPS if it does not exist
               Invoke-Command -Session $session -ScriptBlock {
@@ -71,45 +67,25 @@ jobs:
                       New-Item -ItemType Directory -Path $destPath
                   }
               } -ArgumentList $destinationPath
-
-              # Define the source path
+              # Copy the entire Release64 folder to the destination on the VPS
               $sourcePath = "$env:TEMP\Release64"
-
-              # Get list of files in the source directory
-              $files = Get-ChildItem -Path $sourcePath
-
-              foreach ($file in $files) {
-                  # Check if the file exists on the VPS
-                  $remoteFilePath = Join-Path -Path $destinationPath -ChildPath $file.Name
-                  $needsCopy = $true
-
-                  # Check if the file exists on the remote server
-                  $fileExists = Invoke-Command -Session $session -ScriptBlock {
-                      param($filePath)
-                      Test-Path $filePath
-                  } -ArgumentList $remoteFilePath
-
-                  if ($fileExists) {
-                      # Compare last write time
-                      $remoteFileLastWriteTime = Invoke-Command -Session $session -ScriptBlock {
-                          param($filePath)
-                          (Get-Item $filePath).LastWriteTime
-                      } -ArgumentList $remoteFilePath
-
-                      # Check if local file is newer
-                      if ($file.LastWriteTime -le $remoteFileLastWriteTime) {
-                          $needsCopy = $false
-                          Write-Host "File $($file.Name) is up to date."
-                      }
+              Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
+              # Check if SimpleManager.exe exists
+              Invoke-Command -Session $session -ScriptBlock {
+                  param($destPath)
+                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager.exe")) {
+                      Write-Host "SimpleManager.exe found."
+                  } else {
+                      Write-Host "SimpleManager.exe not found."
+                      exit 1
                   }
-
-                  # If the file is new or updated, copy it
-                  if ($needsCopy) {
-                      Write-Host "Copying $($file.Name) to VPS..."
-                      Copy-Item -Path $file.FullName -Destination $destinationPath -ToSession $session -Force
-                  }
-              }
-
+              } -ArgumentList $destinationPath
+              # Run the .exe file
+              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager.exe"
+              Invoke-Command -Session $session -ScriptBlock {
+                  param($exe)
+                  Start-Process -FilePath $exe -NoNewWindow -Wait
+              } -ArgumentList $exePath
           } catch {
               Write-Host "An error occurred: $_"
           } finally {
