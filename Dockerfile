@@ -18,7 +18,8 @@ RUN dir
 
 # Install the librdkafka.redist package
 WORKDIR /deploy/packages/
-RUN nuget install librdkafka.redist -Version 2.2.0
+RUN nuget locals all -clear
+RUN nuget install librdkafka.redist -Version 1.0.0
 
 # Go back to deploy directory for building the project
 WORKDIR /deploy/

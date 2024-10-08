@@ -237,8 +237,9 @@ int wmain(int argc, wchar_t* argv[])
 				logger->debug("Redis enabled");
 
 
-				MyDealSink dealSink(client, manager, kafka_client);
-				MTAPIRES deaLres = manager.m_manager->DealSubscribe(&dealSink);
+						std::string activePayloadWithId = getPayloadWithId(payload, position->Position(), user_logins[user_login]);
+					kafka_client.pushData(createKey(position->Position(), user_logins[user_login]), activePayloadWithId);
+					//	std::cout << "open payload: " << payload << std::endl;
 
 				if (deaLres != MT_RET_OK) {
 					logger->error("Failed to subscribe to deal events, error code {} ", deaLres);
@@ -248,13 +249,11 @@ int wmain(int argc, wchar_t* argv[])
 				MyUserSink myUserSink(client, manager, kafka_client);
 				MTAPIRES userSink=manager.m_manager->UserSubscribe(&myUserSink);
 
-				if (userSink != MT_RET_OK) {
-					logger->error("Failed to subscribe to tick events, error code {}", userSink);
-					return 1;
-				}
-
-				MyPositionSink  positionSink(client, manager, kafka_client);
-				MTAPIRES posSink = manager.m_manager->PositionSubscribe(&positionSink);
+						std::string payload = manager.convertPositionDataToJson(data.first, data.second, false);
+						std::string closePayloadWithId = getPayloadWithId(payload, data.second->PositionID(), user_logins[user_login]);
+						kafka_client.pushData(createKey(data.second->PositionID(), user_logins[user_login]), closePayloadWithId);
+						
+						std::cout <<"key: "<< createKey(data.second->PositionID(),user_logins[user_login])<< std::endl;
 
 				if (posSink != MT_RET_OK) {
 					logger->error("Failed to subscribe to tick events, error code {}", posSink);
