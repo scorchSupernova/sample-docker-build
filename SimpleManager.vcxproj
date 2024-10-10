@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\vcpkg.C.C.vcpkg.1.0.0\build\native\vcpkg.C.C.vcpkg.props" Condition="Exists('packages\vcpkg.C.C.vcpkg.1.0.0\build\native\vcpkg.C.C.vcpkg.props')" />
-  <Import Project="packages\vcpkg.F.c.vcpkg.1.0.0\build\native\vcpkg.F.c.vcpkg.props" Condition="Exists('packages\vcpkg.F.c.vcpkg.1.0.0\build\native\vcpkg.F.c.vcpkg.props')" />
+ 
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -145,8 +144,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\librdkafka.redist.2.2.0\build\native\librdkafka.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\librdkafka.redist.2.2.0\build\native\librdkafka.redist.targets'))" />
-    <Error Condition="!Exists('packages\vcpkg.C.C.vcpkg.1.0.0\build\native\vcpkg.C.C.vcpkg.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\vcpkg.C.C.vcpkg.1.0.0\build\native\vcpkg.C.C.vcpkg.props'))" />
-    <Error Condition="!Exists('packages\vcpkg.C.C.vcpkg.1.0.0\build\native\vcpkg.C.C.vcpkg.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\vcpkg.C.C.vcpkg.1.0.0\build\native\vcpkg.C.C.vcpkg.targets'))" />
+  
   </Target>
 </Project>
