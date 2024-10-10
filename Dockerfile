@@ -19,7 +19,7 @@ RUN dir
 # Install the librdkafka.redist package
 WORKDIR /deploy/packages/
 RUN nuget locals all -clear
-RUN nuget install librdkafka.redist -Version 1.0.0
+RUN nuget install librdkafka.redist -Version 2.2.0
 
 # Go back to deploy directory for building the project
 WORKDIR /deploy/
@@ -33,11 +33,11 @@ RUN dir Release64
 
 # Copy required DLLs to the release directory
 RUN powershell -Command `
-    Copy-Item 'packages\librdkafka.redist.1.0.0\runtimes\win-x64\native\librdkafka.dll' -Destination 'Release64\' -Force; `
-    Copy-Item 'packages\librdkafka.redist.1.0.0\runtimes\win-x64\native\libcrypto-3-x64.dll' -Destination 'Release64\' -Force; `
-    Copy-Item 'packages\librdkafka.redist.1.0.0\runtimes\win-x64\native\libssl-3-x64.dll' -Destination 'Release64\' -Force; `
-    Copy-Item 'packages\librdkafka.redist.1.0.0\runtimes\win-x64\native\zlib1.dll' -Destination 'Release64\' -Force; `
-    Copy-Item 'packages\librdkafka.redist.1.0.0\runtimes\win-x64\native\zstd.dll' -Destination 'Release64\' -Force"
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\librdkafka.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libcrypto-3-x64.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libssl-3-x64.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zlib1.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zstd.dll' -Destination 'Release64\' -Force"
 
 # Copy config.json to the release directory
 RUN copy config.json Release64\
