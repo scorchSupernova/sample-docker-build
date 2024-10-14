@@ -182,37 +182,63 @@ int wmain(int argc, wchar_t* argv[])
 {
 
 	NV::InterruptHandler::hookSIGINT();
+	Logger::get()->info("Inside main");
 
 	ConfigManager::Load("config.json");
+	Logger::get()->info("Loaded config json");
+
 	string address = ConfigManager::Get("mt5.server");
+	Logger::get()->info("Loaded config json server {}", address);
 	string server_pass = ConfigManager::Get("mt5.password");
+	Logger::get()->info("Loaded config json password {}", server_pass);
 	UINT64 login = ConfigManager::Get("mt5.login", 0);
+	Logger::get()->info("Loaded config json login {}", login);
 	string redis_host_main = ConfigManager::Get("redis.main_redis.url");
+	Logger::get()->info("Loaded config json main_redis_url {}", redis_host_main);
 	int redis_port_main = ConfigManager::Get("redis.main_redis.port", 6379);
+	Logger::get()->info("Loaded config json main_redis_port {}", redis_port_main);
     string redis_host_trade = ConfigManager::Get("redis.trade_redis.url");
+	Logger::get()->info("Loaded config json trade_redis_port {}", redis_host_trade);
 	int redis_port_trade = ConfigManager::Get("redis.trade_redis.port", 6379);
+	Logger::get()->info("Loaded config json redis_port_trade {}", redis_port_trade);
 	string call_back_url=ConfigManager::Get("callBack.url");
+	Logger::get()->info("Loaded config json call back {}", call_back_url);
 	int redis_retry_time_in_second = ConfigManager::Get("redis.config.redis_retry_time_in_second", 60);
+	Logger::get()->info("Loaded config json redis retry time {}", redis_retry_time_in_second);
 	redis_publish_channel = ConfigManager::Get("redis.config.redis_publish_channel");
+	Logger::get()->info("Loaded config json redis publish channel {}", redis_publish_channel);
 	redis_key_prefix = ConfigManager::Get("redis.config.redis_key_prefix");
+	Logger::get()->info("Loaded config json redis key prefix {}", redis_key_prefix);
 	is_error_log_enable =  ConfigManager::Get("error_log.enable",0);
+	Logger::get()->info("Loaded config json error log {}", is_error_log_enable);
 	error_login = ConfigManager::Get("error_log.login", 0);
+	Logger::get()->info("Loaded config json error login {}", error_login);
 	std::map <std::string, std::string> kafka_properties = ConfigManager::GetArray("kafka.kafka_properties");
+	Logger::get()->info("Loaded config json kafka properties");
 	std::string kafka_topic = ConfigManager::Get("kafka.topic");
+	Logger::get()->info("Loaded config json kafka topic {}", kafka_topic);
 
 	wchar_t* server = new wchar_t[256];
 	wchar_t* password = new wchar_t[256];
 	std::mbstowcs(server, address.c_str(), 256);
 	std::mbstowcs(password, server_pass.c_str(), 256);
 
+	Logger::get()->info("password modification");
+
 
 	CManager manager;
+	Logger::get()->info("Manager initialized");
 	RedisClient client(redis_host_main, redis_port_main, redis_host_trade, redis_port_trade);
+	Logger::get()->info("Redis initialized");
+
 	client.setConfigParams(redis_retry_time_in_second, redis_publish_channel, redis_key_prefix,is_error_log_enable, error_login);
+	Logger::get()->info("Redis initialized 2");
 	//HTTPRequest request(call_back_url);
 
 	Kafka kafka_client(kafka_topic);
+		Logger::get()->info("kafka initialized");
 	kafka_client.setParams(kafka_properties);
+		Logger::get()->info("Redis initialized 2");
 
 	// Log initialization information
 	logger->info("Initializing MT5 client...");

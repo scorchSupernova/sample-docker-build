@@ -6,6 +6,7 @@
 //+------------------------------------------------------------------+
 CManager::CManager(void) : m_manager(NULL), m_deal_array(NULL), m_user(NULL), m_account(NULL), u_array(NULL)
 {
+    std::cout<<"Into CManager"<<std::endl;
 }
 //+------------------------------------------------------------------+
 //|                                                                  |
