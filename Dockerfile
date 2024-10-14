@@ -58,10 +58,6 @@ RUN g++ install_package.cpp -o install-package
 # Run the install package script to generate vcpkg.json
 RUN .\install-package.exe
 
-# Generate package.json using generate_package_json
-RUN g++ generate_package_json.cpp -o generate-package-json
-RUN .\generate-package-json.exe
-
 # Install dependencies using vcpkg manifest mode
 RUN .\vcpkg\vcpkg install --triplet x64-windows --feature-flags=manifests
 
