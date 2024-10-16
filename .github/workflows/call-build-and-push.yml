@@ -1,7 +1,6 @@
-name: Build and Push Base Windows C++ Image
+name: Build and Push to Docker Hub
 
 on:
-  workflow_call:
   push:
     branches:
       - main
@@ -9,101 +8,20 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+        uses: docker/login-action@v1
+        with:
+          username: ${ secrets.DOCKER_USERNAME }
+          password: ${ secrets.DOCKER_PASSWORD }
 
-      - name: Build Base Docker Image
-        run: docker build -t saidursajol/my-base-windows-cpp-image-project:latest .
-
-      - name: Extract Release64 folder from Docker image
+      - name: Build Docker image
         run: |
-          # Create a temporary directory
-          $tempDir = New-Item -ItemType Directory -Path "$env:TEMP\Release64" -Force
-          
-          # Verify tempDir creation
-          if (-Not (Test-Path $tempDir.FullName)) {
-              Write-Host "Temporary directory was not created."
-              exit 1
-          }
+          docker build -t saidursajol/cpp-hello-world:latest .
 
-          # Verify the image name
-          $imageName = "saidursajol/my-base-windows-cpp-image-project:latest"
-          Write-Host "Using Docker image: $imageName"
-          
-          # Run the Docker command directly
-          docker run --rm -v "$($tempDir.FullName):C:\output" $imageName powershell -Command "
-            if (Test-Path 'C:\deploy\Release64') {
-                Copy-Item 'C:\deploy\Release64\*' 'C:\output' -Recurse -Force
-                Write-Host 'Files copied successfully'
-            } else {
-                Write-Host 'Release64 folder does not exist'
-                exit 1
-            }
-          "
-
-      - name: Upload Release64 folder to VPS using WinRM (HTTP)
+      - name: Push Docker image
         run: |
-          winrm set winrm/config/client '@{AllowUnencrypted="true"}'
-          Set-Item WSMan:\localhost\Client\TrustedHosts -Value "${{ secrets.VPS_IP }}" -Force
-          $username = "${{ secrets.VPS_USERNAME }}"
-          $password = "${{ secrets.VPS_PASSWORD }}"
-          $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential($username, $securePassword)
-          # Define the VPS IP and destination path on the VPS
-          $vpsIp = "${{ secrets.VPS_IP }}"
-          $destinationPath = "C:\\MetaTrader5SDK\\Examples\\Manager\\SimpleManager\\mt5-microservice-cicd"
-          # Use WinRM to establish a session
-          $session = New-PSSession -ComputerName $vpsIp -Credential $credential -Authentication Basic -Port 5985
-          try {
-              # Create the destination folder on the VPS if it does not exist
-              Invoke-Command -Session $session -ScriptBlock {
-                  param($destPath)
-                  if (-not (Test-Path $destPath)) {
-                      New-Item -ItemType Directory -Path $destPath
-                  }
-              } -ArgumentList $destinationPath
-              
-              # Log contents of the source path
-              $sourcePath = "$env:TEMP\Release64"
-              Write-Host "Contents of source path:"
-              Get-ChildItem -Path "$sourcePath" | ForEach-Object { Write-Host $_.FullName }
-              
-              # Copy the entire Release64 folder to the destination on the VPS
-              Copy-Item -Path "$sourcePath\*" -Destination $destinationPath -ToSession $session -Recurse -Force
-              
-              # Log contents of the destination path
-              Invoke-Command -Session $session -ScriptBlock {
-                  param($destPath)
-                  Write-Host "Contents of destination path:"
-                  Get-ChildItem -Path $destPath | ForEach-Object { Write-Host $_.FullName }
-              } -ArgumentList $destinationPath
-              
-              # Check if SimpleManager64.exe exists
-              Invoke-Command -Session $session -ScriptBlock {
-                  param($destPath)
-                  if (Test-Path (Join-Path -Path $destPath -ChildPath "SimpleManager64.exe")) {
-                      Write-Host "SimpleManager64.exe found."
-                  } else {
-                      Write-Host "SimpleManager64.exe not found."
-                      exit 1
-                  }
-              } -ArgumentList $destinationPath
-              
-              # Run the .exe file
-              $exePath = Join-Path -Path $destinationPath -ChildPath "SimpleManager64.exe"
-              Invoke-Command -Session $session -ScriptBlock {
-                  param($exe)
-                  Start-Process -FilePath $exe -NoNewWindow -Wait
-              } -ArgumentList $exePath
-          } catch {
-              Write-Host "An error occurred: $_"
-          } finally {
-              # Remove the session after the operations
-              Remove-PSSession $session
-          }
-        shell: pwsh
+          docker push saidursajol/cpp-hello-world:latest
