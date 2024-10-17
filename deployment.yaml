@@ -13,7 +13,7 @@ spec:
         app: cpp-hello-world
     spec:
       imagePullSecrets:
-        - name: my-registry-secret  # Move this line here
+        - name: new-registry  # Move this line here
 
       containers:
       - name: cpp-hello-world
