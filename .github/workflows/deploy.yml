@@ -16,8 +16,8 @@ jobs:
 
             - name: Set up KubeConfig
               run: |
-                echo "${{secrets.KUBE_CONFIG}}" > kubeconfig.yaml
-                export KUBECONFIG=$(pwd)/kubeconfig.yaml
+                echo "${{ secrets.KUBE_CONFIG }}" | Out-File -FilePath kubeconfig.yaml -Encoding utf8
+                $env:KUBECONFIG = "$(pwd)\kubeconfig.yaml"
 
             - name: Deploy to K8s
               run: |
