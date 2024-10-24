@@ -29,19 +29,6 @@ jobs:
         run: |
           echo "${{ secrets.KUBE_CONFIG }}" | Out-File -FilePath kubeconfig.yaml -Encoding utf8
           $env:KUBECONFIG = "$(pwd)\kubeconfig.yaml"
-
-      - name: Generate Base64 Certificates
-        run: |
-          echo "Generating base64-encoded certificates..."
-          echo "$(kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')" > ca.crt
-          echo "$(kubectl config view --raw --minify -o jsonpath='{.users[0].user.client-certificate-data}')" > client.crt
-          echo "$(kubectl config view --raw --minify -o jsonpath='{.users[0].user.client-key-data}')" > client.key
-          echo "CA Certificate (base64):"
-          cat ca.crt | base64
-          echo "Client Certificate (base64):"
-          cat client.crt | base64
-          echo "Client Key (base64):"
-          cat client.key | base64
           
       - name: deploy to k8s
         run: |
