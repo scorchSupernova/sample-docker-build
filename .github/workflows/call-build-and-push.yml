@@ -31,5 +31,5 @@ jobs:
           $env:KUBECONFIG = "$(pwd)\kubeconfig.yaml"
       - name: deploy to k8s
         run: |
-          kubectl apply -f deployment.yaml
-          kubectl apply -f service.yaml
+          kubectl apply -f deployment.yaml --kubeconfig=kubeconfig.yaml --validate=false
+          kubectl apply -f service.yaml --kubeconfig=kubeconfig.yaml --validate=false
