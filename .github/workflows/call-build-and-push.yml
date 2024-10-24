@@ -24,3 +24,12 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push saidursajol/cpp-sample-app
+
+      - name: Set up kube config
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | Out-File -FilePath kubeconfig.yaml -Encoding utf8
+          $env:KUBECONFIG = "$(pwd)\kubeconfig.yaml"
+      - name: deploy to k8s
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
