@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cpp-hello-world
+  name: cpp-sample-app
+
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cpp-hello-world
+      app: cpp-sample-app
   template:
     metadata:
       labels:
-        app: cpp-hello-world
+        app: cpp-sample-app
     spec:
-      imagePullSecrets:
-        - name: new-registry  # Move this line here
-
       containers:
-      - name: cpp-hello-world
-        image: saidursajol/cpp-hello-world:latest
+      - name: cpp-sample-app
+        image: saidursajol/cpp-sample-app
+        ports:
+        - containerPort: 80
