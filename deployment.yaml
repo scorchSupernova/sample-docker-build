@@ -1,20 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cpp-sample-app
-
+  name: my-windows-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cpp-sample-app
+      app: my-windows-app
   template:
     metadata:
-      labels:
-        app: cpp-sample-app
+      labels: my-windows-app
     spec:
       containers:
-      - name: cpp-sample-app
-        image: saidursajol/cpp-sample-app
-        ports:
-        - containerPort: 80
+        - name: my-windows-app
+          image: saidursajol/myc:latest
+          ports:
+            - containerPort: 80
