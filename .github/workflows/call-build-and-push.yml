@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Push Base Windows C++ Image
 
 on:
   workflow_call:
@@ -11,32 +11,14 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-      - name: Build Docker Image
-        run: |
-          docker build -t saidursajol/cpp-sample-app .
+      - name: Build Base Docker Image
+        run: docker build -t saidursajol/my-base-windows-cpp-image-project:v1.0 .
 
-      - name: Push Docker Image
-        run: |
-          docker push saidursajol/cpp-sample-app
-
-  run:
-    runs-on: windows-latest
-    needs: build
-
-    steps:
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-
-      - name: Pull Docker Image
-        run: |
-          docker pull saidursajol/cpp-sample-app
-
-      - name: Run Docker Image
-        run: |
-          docker run saidursajol/cpp-sample-app
+      - name: Push Docker Image to Docker Hub
+        run: docker push saidursajol/my-base-windows-cpp-image-project:v1.0

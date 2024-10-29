@@ -1,0 +1,44 @@
+{
+  "redis": {
+    "main_redis": {
+      "url": "localhost",
+      "port": 6379
+    },
+    "trade_redis": {
+      "url": "localhost",
+      "port": 6379
+    },
+    "config": {
+      "redis_retry_time_in_second": 150,
+      "redis_publish_channel": "REDIS_TRADE_PUB_SUB",
+      "redis_key_prefix": "TRADE:MT5-"
+    }
+  },
+  "mt5": {
+    "server": "mt5localcompetition.growthnext.com",
+    "login": 1001,
+    "password": "ctgjd0fr"
+  },
+  "logger": {
+    "info": true,
+    "debug": true,
+    "error": true
+  },
+  "error_log": {
+    "enable": 0,
+    "login": 352194
+  },
+  "callBack": {
+    "url": "https://evaluation.fundednext.com/api/receivetrades"
+  },
+  "kafka": {
+    "kafka_properties": {
+      "bootstrap.servers": "staging-uat-kafka-37bebda7-wearenext-640d.d.aivencloud.com:14133",
+      "security.protocol": "ssl",
+      "ssl.ca.location": "./kafka_config/ca.pem",
+      "ssl.certificate.location": "./kafka_config/service.cert",
+      "ssl.key.location": "./kafka_config/service.key"
+    },
+    "topic": "staging_main_trades"
+  }
+}

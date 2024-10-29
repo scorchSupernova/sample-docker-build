@@ -1,31 +1,45 @@
-# Use an official Windows Server Core image
-FROM mcr.microsoft.com/windows/servercore:ltsc2022
+# escape=`
 
-# Set the working directory
-WORKDIR /app
+FROM saidursajol/my-base-windows-cpp-image:1.0
 
-# Install Chocolatey (package manager for Windows)
-RUN @powershell -NoProfile -ExecutionPolicy unrestricted -Command "(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1"
+# Verify MSBuild installation
+RUN msbuild -version
 
-# Install MinGW
-RUN powershell -NoProfile -ExecutionPolicy Bypass -Command "choco install mingw -y"
+# Install NuGet command line
+RUN choco install nuget.commandline -y
 
-# Set environment variables for MinGW
-# Install MinGW and update PATH
-RUN choco install mingw -y
-RUN powershell.exe -Command $path = $env:path + ';C:\ProgramData\mingw64\mingw64\bin'; Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\' -Name Path -Value $path
+# Create deploy directory and copy project files
+RUN mkdir deploy
+COPY . /deploy/
+WORKDIR /deploy/
 
-# Install CMake
-RUN choco install cmake --pre --installargs 'ADD_CMAKE_TO_PATH=System' -y
-RUN refreshenv
+# List files to verify the solution file is copied
+RUN dir
 
-# Copy the source code into the container
-COPY main.cpp .
+# Install the librdkafka.redist package
+WORKDIR /deploy/packages/
+RUN nuget install librdkafka.redist -Version 2.2.0
 
-# Wait for a bit to ensure MinGW is properly installed
+# Go back to deploy directory for building the project
+WORKDIR /deploy/
 
-# Build the application using g++
-RUN g++ main.cpp -o hello.exe
+# Build the project from the correct directory
+RUN msbuild SimpleManager.sln /p:Configuration=Release /p:VcpkgEnableManifest=true
 
-# Command to run the application
-CMD ["hello.exe"]
+RUN dir 
+
+RUN dir Release64
+
+# Copy required DLLs to the release directory
+RUN powershell -Command `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\librdkafka.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libcrypto-3-x64.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\libssl-3-x64.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zlib1.dll' -Destination 'Release64\' -Force; `
+    Copy-Item 'packages\librdkafka.redist.2.2.0\runtimes\win-x64\native\zstd.dll' -Destination 'Release64\' -Force"
+
+# Copy config.json to the release directory
+RUN copy config.json Release64\
+
+# Set the default command to cmd.exe
+CMD ["cmd.exe"]
