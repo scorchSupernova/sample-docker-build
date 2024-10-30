@@ -300,7 +300,7 @@ int wmain(int argc, wchar_t* argv[])
 		}
 		else {
 			logger->error("Initialize failed");
-			std::cout<<"Initialize failed"<<std::endl;
+			std::cout<<"Initialize failed."<<std::endl;
 
 		}
 	}
