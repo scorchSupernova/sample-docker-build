@@ -199,6 +199,7 @@ int wmain(int argc, wchar_t* argv[])
 	error_login = ConfigManager::Get("error_log.login", 0);
 	std::map <std::string, std::string> kafka_properties = ConfigManager::GetArray("kafka.kafka_properties");
 	std::string kafka_topic = ConfigManager::Get("kafka.topic");
+	std::cout<<"Config Variable taken done"<<std::endl;
 
 	wchar_t* server = new wchar_t[256];
 	wchar_t* password = new wchar_t[256];
@@ -208,6 +209,7 @@ int wmain(int argc, wchar_t* argv[])
 
 	CManager manager;
 	RedisClient client(redis_host_main, redis_port_main, redis_host_trade, redis_port_trade);
+	std::cout<<"Redis initialized done"<<std::endl;
 	client.setConfigParams(redis_retry_time_in_second, redis_publish_channel, redis_key_prefix,is_error_log_enable, error_login);
 	//HTTPRequest request(call_back_url);
 
@@ -216,25 +218,38 @@ int wmain(int argc, wchar_t* argv[])
 
 	// Log initialization information
 	logger->info("Initializing MT5 client...");
+	std::cout<<"Initializing MT5 client..."<<std::endl;
 
 	try {
 		if (manager.Initialize()) {
 			logger->info("Inited server successfull");
+			std::cout<<"Inited server successfull"<<std::endl;
+
 
 			if (manager.Login(server, login, password)) {
 				logger->debug("Successfully logged in: {}", login);
+				std::cout<<"Successfully logged in: "<<login<<std::endl;
+
 				
 				if (!kafka_client.connect()) {
 					logger->error("Failed to connect to Kafka server");
+					std::cout<<"Failed to connect to Kafka server"<<std::endl;
+
 					return -1;
 				}
 				logger->debug("Kafka enabled");
+				std::cout<<"Kafka enabled"<<std::endl;
+
 				
 				if (!client.Connect()) {
 					logger->error("Failed to connect to redis server");
+					std::cout<<"Failed to connect to redis server"<<std::endl;
+
 					return -1;
 				}
 				logger->debug("Redis enabled");
+				std::cout<<"Redis enabled"<<std::endl;
+
 
 
 				MyDealSink dealSink(client, manager, kafka_client);
@@ -242,6 +257,8 @@ int wmain(int argc, wchar_t* argv[])
 
 				if (deaLres != MT_RET_OK) {
 					logger->error("Failed to subscribe to deal events, error code {} ", deaLres);
+					std::cout<<"Failed to subscribe to deal events"<<std::endl;
+
 					return 1;
 				}
 
@@ -250,6 +267,8 @@ int wmain(int argc, wchar_t* argv[])
 
 				if (userSink != MT_RET_OK) {
 					logger->error("Failed to subscribe to tick events, error code {}", userSink);
+					std::cout<<"Failed to subscribe to tick events"<<std::endl;
+
 					return 1;
 				}
 
@@ -258,6 +277,8 @@ int wmain(int argc, wchar_t* argv[])
 
 				if (posSink != MT_RET_OK) {
 					logger->error("Failed to subscribe to tick events, error code {}", posSink);
+					std::cout<<"Failed to subscribe to tick events"<<std::endl;
+
 					return 1;
 				}
 
@@ -273,10 +294,14 @@ int wmain(int argc, wchar_t* argv[])
 			}
 			else {
 				logger->error("Login failed {} ", login);
+				std::cout<<"Login failed: "<<login<<std::endl;
+
 			}
 		}
 		else {
 			logger->error("Initialize failed");
+			std::cout<<"Initialize failed"<<std::endl;
+
 		}
 	}
 	catch (int e) {
